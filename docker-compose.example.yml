@@ -1,0 +1,21 @@
+version: "3.4"
+
+services:
+  azure-openai-proxy:
+    image: stulzq/azure-openai-proxy:v1.1.0
+    restart: always
+    ports:
+      - "8080:8080"
+    # volumes:
+    # You can also use configuration files
+    # - ./config.yaml:/app/config.yaml
+    environment:
+      - TZ=Asia/Shanghai
+      # Use a URL starting with `https://` and ending with `.openai.azure.com/`
+      - AZURE_OPENAI_ENDPOINT=https://<Azure OpenAI Endpoint Name>.openai.azure.com/
+      # Use custom model mapping, such as: gpt-3.5-turbo:gpt-35-turbo
+      - AZURE_OPENAI_MODEL_MAPPER=gpt-3.5-turbo:gpt-35-turbo
+      # If the environment variable is not defined, the value from the request is used
+      - AZURE_OPENAI_API_KEY=<Azure OpenAI API Key>
+      # It is recommended to use the latest stable version from the Microsoft Azure documentation
+      - AZURE_OPENAI_API_VER=2023-05-15
