@@ -27,7 +27,7 @@ version: "3.4"
 
 services:
   azure-openai-proxy:
-    image: stulzq/azure-openai-proxy:v1.1.0
+    image: soulteary/azure-openai-proxy:v1.2.0
     restart: always
     ports:
       - "8080:8080"
@@ -222,7 +222,7 @@ docker-compose:
 
 ````yaml
 azure-openai:
-    image: stulzq/azure-openai-proxy
+    image: soulteary/azure-openai-proxy:1.2.0
     ports:
       - 8080:8080
     volumes:
