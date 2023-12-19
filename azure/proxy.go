@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/stulzq/azure-openai-proxy/util"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"strings"
+
+	"github.com/stulzq/azure-openai-proxy/util"
 
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"

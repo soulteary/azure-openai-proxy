@@ -3,13 +3,14 @@ package azure
 import (
 	"bytes"
 	"fmt"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
 	"text/template"
+
+	"github.com/pkg/errors"
 )
 
 type DeploymentConfig struct {

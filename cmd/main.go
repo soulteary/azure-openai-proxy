@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
-	"github.com/stulzq/azure-openai-proxy/azure"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"github.com/stulzq/azure-openai-proxy/azure"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
