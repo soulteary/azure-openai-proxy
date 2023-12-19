@@ -1,21 +1,10 @@
-# azure-openai-proxy
+# Azure Openai Proxy
 
-[![License](https://img.shields.io/github/license/koordinator-sh/koordinator.svg?color=4EB1BA&style=flat-square)](https://opensource.org/licenses/Apache-2.0)
-[![GitHub release](https://img.shields.io/github/v/release/stulzq/azure-openai-proxy.svg?style=flat-square)](https://github.com/stulzq/azure-openai-proxy/releases/latest)
-[![Go Report Card](https://goreportcard.com/badge/github.com/stulzq/azure-openai-proxy)](https://goreportcard.com/badge/github.com/stulzq/azure-openai-proxy)
-[![CI](https://img.shields.io/github/actions/workflow/status/stulzq/azure-openai-proxy/ci.yml?label=CI&logo=github&style=flat-square&branch=master)](https://github.com/stulzq/azure-openai-proxy/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/actions/workflow/status/stulzq/azure-openai-proxy/release.yml?label=Release&logo=github&style=flat-square&branch=master)](https://github.com/stulzq/azure-openai-proxy/actions/workflows/release.yml)
-[![PRs Welcome](https://badgen.net/badge/PRs/welcome/green?icon=https://api.iconify.design/octicon:git-pull-request.svg?color=white&style=flat-square)](CONTRIBUTING.md)
-[![Docker Pulls](https://img.shields.io/docker/pulls/stulzq/azure-openai-proxy.svg?style=flat-square)]([https://hub.docker.com/u/stulzq](https://hub.docker.com/r/stulzq/azure-openai-proxy/tags))
+Azure OpenAI Service Proxy，能够将 Azure OpenAI API 服务转换为 OpenAI API 兼容的请求，支持 GPT-4、GPT-3.5、Embeddings。
 
-English|[中文](https://www.cnblogs.com/stulzq/p/17271937.html)
+修改自[stulzq/azure-openai-proxy](https://github.com/stulzq/azure-openai-proxy)。
 
-Azure OpenAI Service Proxy, convert OpenAI official API request to Azure OpenAI API request, support all models, support GPT-4,Embeddings.
->Eliminate the differences between OpenAI and Azure OpenAI, acting as a bridge connecting them, OpenAI ecosystem accesses Azure OpenAI at zero cost.
-
-![aoai-proxy.jpg](assets/images/aoai-proxy.jpg)
-
-Verified support projects：
+## 验证可用的开源项目
 
 | Name                                                     | Status |
 | -------------------------------------------------------- | ------ |
@@ -24,39 +13,46 @@ Verified support projects：
 | [langchain](https://python.langchain.com/en/latest/)     | √    |
 | [ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web) | √ |
 
-## Get Start
 
-### Retrieve key and endpoint
+## 下载镜像
 
-To successfully make a call against Azure OpenAI, you'll need the following:
+```bash
+docker pull soulteary/azure-openai-proxy:1.2.0
+```
 
-| Name                  | Desc                                                         | Default                                                  |
-| --------------------- | ------------------------------------------------------------ | ----------------------------- |
-| AZURE_OPENAI_ENDPOINT | This value can be found in the **Keys & Endpoint** section when examining your resource from the Azure portal. Alternatively, you can find the value in **Azure OpenAI Studio** > **Playground** > **Code View**. An example endpoint is: `https://docs-test-001.openai.azure.com/`. | N |
-| AZURE_OPENAI_API_VER  | [See here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/quickstart?tabs=command-line&pivots=rest-api) or Azure OpenAI Studio | 2023-07-01-preview |
-| AZURE_OPENAI_MODEL_MAPPER   | This value will correspond to the custom name you chose for your deployment when you deployed a model. This value can be found under **Resource Management** > **Deployments** in the Azure portal or alternatively under **Management** > **Deployments** in Azure OpenAI Studio. | N |
+## 快速上手
 
-`AZURE_OPENAI_MODEL_MAPPER` is a mapping from Azure OpenAI deployed model names to official OpenAI model names. You can use commas to separate multiple mappings.
+```yaml
+version: "3.4"
 
-**Format：**
+services:
+  azure-openai-proxy:
+    image: stulzq/azure-openai-proxy:v1.1.0
+    restart: always
+    ports:
+      - "8080:8080"
+    # volumes:
+    # You can also use configuration files
+    # - ./config.yaml:/app/config.yaml
+    environment:
+      - TZ=Asia/Shanghai
+      # 使用以 `https://` 开头，以 `.openai.azure.com/` 结尾的 URL
+      - AZURE_OPENAI_ENDPOINT=https://<Azure OpenAI Endpoint Name>.openai.azure.com/
+      # 你需要使用映射字符串，来将程序调用的模型，和你实际 Azure 部署的模型关联起来: gpt-3.5-turbo:gpt-35-turbo
+      - AZURE_OPENAI_MODEL_MAPPER=gpt-3.5-turbo:gpt-35-turbo
+      # 如果你定义了这个参数，那么你的程序在调用 “OpenAI API” 的时候，就不需要携带 KEY 的内容了，更方便，也更安全
+      - AZURE_OPENAI_API_KEY=<Azure OpenAI API Key>
+      # 推荐你始终使用 Stable 版本的 API，而非 Preview
+      - AZURE_OPENAI_API_VER=2023-05-15
+```
 
-`AZURE_OPENAI_MODEL_MAPPER`: \<OpenAI Model Name\>=\<Azure OpenAI deployment model name\>
+## 原理
 
-OpenAI Model Names: https://platform.openai.com/docs/models
+![aoai-proxy.jpg](assets/images/aoai-proxy.jpg)
 
-Azure Deployment Names: **Resource Management** > **Deployments**
+## 网络代理
 
-**Example:**
-
-````yaml
-AZURE_OPENAI_MODEL_MAPPER: gpt-3.5-turbo=gpt-35-turbo
-````
-
-![Screenshot of the overview UI for an OpenAI Resource in the Azure portal with the endpoint & access keys location circled in red.](assets/images/endpoint.png)
-
-API Key: This value can be found in the **Keys & Endpoint** section when examining your resource from the Azure portal. You can use either `KEY1` or `KEY2`. 
-
-### Proxy
+如果你的网络不能够直接访问 Azure 云服务器，可以考虑设置下面的参数。
 
 **HTTP Proxy**
 
@@ -76,25 +72,9 @@ Env:
 AZURE_OPENAI_SOCKS_PROXY=socks5://127.0.0.1:1080
 ````
 
+## 调用验证
 
-
-### Use Docker
-
-````shell
-# config by environment 
-docker run -d -p 8080:8080 --name=azure-openai-proxy \
-  --env AZURE_OPENAI_ENDPOINT=your_azure_endpoint \
-  --env AZURE_OPENAI_API_VER=your_azure_api_ver \
-  --env AZURE_OPENAI_MODEL_MAPPER=your_azure_deploy_mapper \
-  stulzq/azure-openai-proxy:latest
-
-# config by file
-docker run -d -p 8080:8080 --name=azure-openai-proxy \
-  -v /path/to/config.yaml:/app/config.yaml \
-  stulzq/azure-openai-proxy:latest
-````
-
-Call API:
+使用 Curl ：
 
 ````shell
 curl --location --request POST 'localhost:8080/v1/chat/completions' \
@@ -116,7 +96,7 @@ curl --location --request POST 'localhost:8080/v1/chat/completions' \
 }'
 ````
 
-### Use ChatGPT-Next-Web
+### 使用 ChatGPT-Next-Web
 
 ![chatgpt-web](assets/images/chatgpt-next-web.png)
 
@@ -144,13 +124,13 @@ services:
       - chatgpt-ns
 
   azure-openai:
-    image: stulzq/azure-openai-proxy
+    image: soulteary/azure-openai-proxy:1.2.0
     ports:
       - 8080:8080
     environment:
       AZURE_OPENAI_ENDPOINT: <Azure OpenAI API Endpoint>
       AZURE_OPENAI_MODEL_MAPPER: <Azure OpenAI API Deployment Mapper>
-      # AZURE_OPENAI_MODEL_MAPPER: gpt-4=gpt-4,gpt-3.5-turbo=gpt-35-turbo
+      AZURE_OPENAI_MODEL_MAPPER: gpt-4:gpt-4,gpt-3.5-turbo:gpt-35-turbo
       AZURE_OPENAI_API_VER: 2023-07-01-preview
     networks:
       - chatgpt-ns
@@ -160,7 +140,7 @@ networks:
     driver: bridge
 ````
 
-### Use ChatGPT-Web
+### 使用 ChatGPT-Web
 
 ChatGPT Web: https://github.com/Chanzhaoyu/chatgpt-web
 
@@ -197,7 +177,7 @@ services:
       - chatgpt-ns
 
   azure-openai:
-    image: stulzq/azure-openai-proxy
+    image: soulteary/azure-openai-proxy:1.2.0
     ports:
       - 8080:8080
     environment:
@@ -212,15 +192,7 @@ networks:
     driver: bridge
 ````
 
-Run:
-
-````shell
-docker compose up -d
-````
-
-### Use Config File
-
-The configuration file supports different endpoints and API keys for each model.
+### 使用配置文件
 
 config.yaml
 
@@ -244,7 +216,7 @@ deployment_config:
     api_version: "2023-03-15-preview"
 ````
 
-By default, it reads `<workdir>/config.yaml`, and you can pass the path through the parameter `-c config.yaml`.
+程序默认读取配置文件为 `<workdir>/config.yaml`, 你可以使用参数调整读取配置文件的路径 `-c config.yaml`。
 
 docker-compose:
 
